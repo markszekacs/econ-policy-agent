@@ -1,0 +1,25 @@
+# Secrets
+.env
+
+# Copyrighted source documents and their derived text
+rag/documents/*.pdf
+rag/.md_cache/
+
+# Rebuildable data stores
+.lancedb/
+econ_agent.db
+*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Run logs (keep curated results in eval/ instead)
+logs/
+
+# Editor/OS noise
+.vscode/
+.DS_Store
+Thumbs.db

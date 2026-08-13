@@ -1,0 +1,54 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: econ_agent
+      POSTGRES_USER: econ_user
+      POSTGRES_PASSWORD: econ_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U econ_user -d econ_agent"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DATABASE_URL=postgresql://econ_user:econ_pass@db:5432/econ_agent
+    volumes:
+      - ./logs:/app/logs
+      - ./.lancedb:/app/.lancedb
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
+
+  streamlit:
+    build: .
+    ports:
+      - "8501:8501"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - COHERE_API_KEY=${COHERE_API_KEY}
+      - DATABASE_URL=postgresql://econ_user:econ_pass@db:5432/econ_agent
+    volumes:
+      - ./logs:/app/logs
+      - ./.lancedb:/app/.lancedb
+    depends_on:
+      db:
+        condition: service_healthy
+    command: streamlit run app/main.py --server.port 8501 --server.address 0.0.0.0
+
+volumes:
+  postgres_data:

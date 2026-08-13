@@ -1,0 +1,10 @@
+URGENT FIX 1: In config.py, increase critic max_tokens from 1500 to 3000.
+The critic is consistently failing with max_tokens limit error
+because it needs to process 5 agent outputs simultaneously.
+
+URGENT FIX 2: In agents/critic.py, also increase the max_tokens
+parameter in the client.messages.create call to match config.
+
+After these fixes, run one test query in full mode to verify
+the critic runs successfully.
+
